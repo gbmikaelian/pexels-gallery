@@ -24,7 +24,6 @@ import {
   PhotoCard,
   Image,
 } from "./MasonryStyles";
-import axios from "axios";
 
 export interface MasonryVirtualizedProps {
   photos: Photo[];
@@ -41,49 +40,8 @@ type Props = {
 };
 
 const WrappedImage = ({ src, alt, width, height }: Props) => {
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  const controllerRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    controllerRef.current = controller;
-
-    axios
-      .get(src, {
-        responseType: "blob",
-        signal: controller.signal,
-      })
-      .then((res) => {
-        const url = URL.createObjectURL(res.data);
-        setBlobUrl(url);
-      })
-      .catch((err) => {
-        if (
-          axios.isCancel(err) ||
-          err.name === "CanceledError" ||
-          err.name === "AbortError"
-        ) {
-          console.log("Image load aborted");
-        } else {
-          console.error("Image load failed:", err);
-        }
-      });
-
-    return () => {
-      controller.abort();
-    };
-  }, [src]);
-
-  if (!blobUrl) return null;
-
   return (
-    <Image
-      src={blobUrl}
-      alt={alt}
-      width={width}
-      height={height}
-      loading="lazy"
-    />
+    <Image src={src} alt={alt} width={width} height={height} loading="lazy" />
   );
 };
 
